@@ -698,8 +698,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 444e470ddf70a6e42ad04ffc4013e768, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Enemy1: {fileID: 0}
-  Enemy2: {fileID: 0}
+  Enemy1: {fileID: 585684398676233841, guid: 19c96b3145d2db144a02789ecf790a7d, type: 3}
+  Enemy2: {fileID: 585684398676233841, guid: 2ae032f4b1d0e28469fb963b28e0b27b, type: 3}
   Enemy3: {fileID: 0}
   Enemy4: {fileID: 0}
   panel: {fileID: 536212056}

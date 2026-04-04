@@ -1183,10 +1183,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 444e470ddf70a6e42ad04ffc4013e768, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Enemy1: {fileID: 1231583610305700176, guid: 73f068e61ec446e498676b342e866ff9, type: 3}
-  Enemy2: {fileID: 7817305959661547260, guid: 483adcbf612da214ba00de2e094b83bd, type: 3}
+  Enemy1: {fileID: 585684398676233841, guid: 19c96b3145d2db144a02789ecf790a7d, type: 3}
+  Enemy2: {fileID: 585684398676233841, guid: 2ae032f4b1d0e28469fb963b28e0b27b, type: 3}
   Enemy3: {fileID: 6782051221051147545, guid: b2f02fb7c182db3479c4b4afd2cb55ea, type: 3}
-  Enemy4: {fileID: 585684398676233841, guid: 19c96b3145d2db144a02789ecf790a7d, type: 3}
+  Enemy4: {fileID: 0}
   panel: {fileID: 1760773263}
   playerHealth: 20
   healthText: {fileID: 145142624}
