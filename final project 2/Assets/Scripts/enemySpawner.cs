@@ -23,6 +23,7 @@ public class enemySpawner : MonoBehaviour
     private int enemiesAlive;
     private int enemiesLeftToSpawn;
     private bool isSpawning = false;
+    private float currentSpawnDelay = 0f;
 
     private void Awake()
     {
@@ -39,12 +40,21 @@ public class enemySpawner : MonoBehaviour
 
         timeSinceLastSpawn += Time.deltaTime;
 
-        if (timeSinceLastSpawn >= (1f / enemiesPerSecond) && enemiesLeftToSpawn > 0)
+        // Якщо це новий цикл, рахуємо випадковий час для наступного ворога
+        if (currentSpawnDelay == 0f)
+        {
+            // Базовий час (напр. 2 сек) +/- 0.5 секунд випадковості
+            float baseDelay = 1f / enemiesPerSecond;
+            currentSpawnDelay = Random.Range(baseDelay * 0.7f, baseDelay * 1.3f);
+        }
+
+        if (timeSinceLastSpawn >= currentSpawnDelay && enemiesLeftToSpawn > 0)
         {
             SpawnEnemy();
             enemiesLeftToSpawn--;
             enemiesAlive++;
             timeSinceLastSpawn = 0f;
+            currentSpawnDelay = 0f;
         }
 
         if (enemiesAlive == 0 && enemiesLeftToSpawn == 0)

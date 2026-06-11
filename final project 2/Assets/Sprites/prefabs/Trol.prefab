@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 8173674739107577342}
   - component: {fileID: -119326200746389008}
   - component: {fileID: -2391605503061703139}
+  - component: {fileID: -7502617030232042354}
   m_Layer: 6
   m_Name: Trol
   m_TagString: Untagged
@@ -163,6 +164,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rb: {fileID: 8173674739107577342}
+  anim: {fileID: -7502617030232042354}
+  spriteRenderer: {fileID: 0}
   moveSpeed: 3
 --- !u!114 &-2391605503061703139
 MonoBehaviour:
@@ -177,3 +180,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hitPoints: 4
+--- !u!95 &-7502617030232042354
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 585684398676233841}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 5024aa8552e997e4db15d54dc8480da8, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
