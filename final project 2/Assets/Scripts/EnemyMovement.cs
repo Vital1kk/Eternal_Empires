@@ -6,15 +6,25 @@ public class EnemyMovement : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private Rigidbody2D rb;
-    [SerializeField] private Animator anim; // <-- Додали поле для Аніматора
-    [SerializeField] private SpriteRenderer spriteRenderer; // <-- Додали для повороту вліво/вправо
+    [SerializeField] private Animator anim;
+    [SerializeField] private SpriteRenderer spriteRenderer;
+
+    [Header("Audio Settings")]
+    [SerializeField] private AudioSource walksound;
+    [SerializeField] private AudioSource deadsound;
+    [SerializeField] private AudioSource monsterAudioSource; // Джерело звуку для хрипів/звуків монстра
+    [SerializeField] private AudioClip[] monsterSounds; // Масив аудіокліпів (закидай сюди будь-яку кількість)
+
+    [Header("Monster Sound Timing")]
+    [SerializeField] private float minSoundInterval = 3f; // Мінімальна пауза між хрипами
+    [SerializeField] private float maxSoundInterval = 7f; // Максимальна пауза між хрипами
 
     [Header("Attributes")]
     [SerializeField] private float moveSpeed = 2f;
 
     private Transform target;
     private int pathIndex = 0;
-    private bool isDead = false; // <-- Прапорець, щоб мертвий ворог нічого не робив
+    private bool isDead = false;
 
     public delegate void EnemyReachedLastPoint();
     public static event EnemyReachedLastPoint OnEnemyReachedLastPoint;
@@ -22,18 +32,28 @@ public class EnemyMovement : MonoBehaviour
     private void Start()
     {
         target = PointManager.main.path[pathIndex];
-
-        // Унікальна швидкість для цього конкретного ворога (базова швидкість +/- 15%)
         moveSpeed = Random.Range(moveSpeed * 0.85f, moveSpeed * 1.15f);
 
-        // Авто-пошук компонентів, якщо забув перетягнути в інспекторі
         if (anim == null) anim = GetComponent<Animator>();
         if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+
+        // 1. Запуск циклічного звуку ходьби
+        if (walksound != null)
+        {
+            walksound.loop = true;
+            walksound.Play();
+        }
+
+        // 2. Запуск таймера для випадкових хрипів/звуків монстра
+        if (monsterSounds != null && monsterSounds.Length > 0 && monsterAudioSource != null)
+        {
+            StartCoroutine(PlayRandomMonsterSounds());
+        }
     }
 
     private void Update()
     {
-        if (isDead) return; // Якщо ворог мертвий, зупиняємо виконання Update
+        if (isDead) return;
 
         if (Vector2.Distance(target.position, transform.position) <= 0.1f)
         {
@@ -43,6 +63,9 @@ public class EnemyMovement : MonoBehaviour
             {
                 OnEnemyReachedLastPoint?.Invoke();
                 enemySpawner.onEnemyDestroy.Invoke();
+
+                // Зручно вимкнути звук перед знищенням
+                StopAllCoroutines();
                 Destroy(gameObject);
                 return;
             }
@@ -52,13 +75,12 @@ public class EnemyMovement : MonoBehaviour
             }
         }
 
-        // Поворот спрайту залежно від напрямку руху
         FlipSprite();
     }
 
     private void FixedUpdate()
     {
-        if (isDead) return; // Якщо мертвий, не рухаємо його через фізику
+        if (isDead) return;
 
         Vector2 direction = (target.position - transform.position).normalized;
         rb.velocity = direction * moveSpeed;
@@ -66,10 +88,9 @@ public class EnemyMovement : MonoBehaviour
 
     private void FlipSprite()
     {
-        // Якщо ціль справа — дивимось направо, якщо зліва — наліво
         if (target.position.x > transform.position.x)
         {
-            spriteRenderer.flipX = false; // або true (залежить від того, куди спочатку дивиться твій спрайт)
+            spriteRenderer.flipX = false;
         }
         else if (target.position.x < transform.position.x)
         {
@@ -77,29 +98,61 @@ public class EnemyMovement : MonoBehaviour
         }
     }
 
-    // --- МЕТОД ДЛЯ СМЕРТІ ВОРОГА ---
-    // Викликай його зі скрипту вежі / кулі / гравця, коли у ворога закінчується HP
+    // Корутина для програвання випадкових звуків під час ходьби
+    private IEnumerator PlayRandomMonsterSounds()
+    {
+        while (!isDead)
+        {
+            // Чекаємо випадковий проміжок часу перед наступним хрипом
+            float waitTime = Random.Range(minSoundInterval, maxSoundInterval);
+            yield return new WaitForSeconds(waitTime);
+
+            if (isDead) break;
+
+            // Обираємо випадковий звук з масиву
+            int randomIndex = Random.Range(0, monsterSounds.Length);
+            AudioClip clipToPlay = monsterSounds[randomIndex];
+
+            if (clipToPlay != null)
+            {
+                monsterAudioSource.PlayOneShot(clipToPlay);
+            }
+        }
+    }
+
     public void Die()
     {
-        if (isDead) return; // Захист від повторного виклику
+        if (isDead) return;
 
         isDead = true;
 
-        // Зупиняємо фізичне тіло, щоб ворог не котився по інерції
-        rb.velocity = Vector2.zero;
-        rb.simulated = false; // Вимикаємо колізії, щоб інші вороги не спотикалися об труп
+        // Зупиняємо корутину хрипів, щоб після смерті монстр більше не видавав живих звуків
+        StopAllCoroutines();
 
-        // Запускаємо тригер смерті в Аніматорі
+        rb.velocity = Vector2.zero;
+        rb.simulated = false;
+
+        // Зупиняємо звук ходьби
+        if (walksound != null && walksound.isPlaying)
+        {
+            walksound.Stop();
+        }
+
+        // Відтворюємо звук смерті
+        if (deadsound != null && deadsound.clip != null)
+        {
+            // Створюємо тимчасове джерело звуку у світовій позиції, 
+            // щоб звук смерті дограв до кінця, навіть якщо Destroy(gameObject) спрацює раніше
+            AudioSource.PlayClipAtPoint(deadsound.clip, transform.position, deadsound.volume);
+        }
+
         if (anim != null)
         {
             anim.SetTrigger("Die");
         }
 
-        // Викликаємо івент знищення (як у тебе при досягненні кінця вейпоінту)
         enemySpawner.onEnemyDestroy.Invoke();
 
-        // Видаляємо об'єкт через 1 секунду (дай час анімації смерті програтися)
-        // Зміни 1.0f на тривалість твоєї анімації, якщо вона довша/коротша
         Destroy(gameObject, 1.0f);
     }
 }
